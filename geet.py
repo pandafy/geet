@@ -1,4 +1,4 @@
-#!/usr/bin/env python3 
+
 print('Initiating geet')
 import os
 from os import listdir,path,walk
@@ -6,11 +6,17 @@ from time import ctime
 import json
 import shutil
 
+pathJoin=os.path.join
+
+#################################################################
+#			USER DEFINED CONSTANTS
+#################################################################
 
 database = '/home/stark/Desktop/JSON DATA/Geet_files/'
 workingDir = '/home/stark/Desktop/college'
+lstrip_path = workingDir.rstrip(os.path.basename(workingDir))
 
-#----------------------------------------------------------------
+#################################################################
 
 
 def index(direc_loc,workingDir):
@@ -45,9 +51,11 @@ def index(direc_loc,workingDir):
 
 def jsonify_data(root,dirs,files):
 	obj = []
+	root_strip = root.lstrip(lstrip_path)
 	for filename in files :
 		meta = {
-			"path" : root + '/' + filename,
+			"path" : root_strip + '/' + filename,
+			"abspath" : pathJoin(root,filename),
 			"name" : filename,
 			"date" : ctime(path.getmtime(root + '/' + filename)),
 			"DIR" : "false"
@@ -56,7 +64,8 @@ def jsonify_data(root,dirs,files):
 
 	for directories in dirs :
 		meta = {
-			"path" : root + '/' +directories,
+			"path" : pathJoin(root_strip,directories),
+			"abspath" : pathJoin(root,directories),
 			"name" : directories,
 			"date" : ctime(path.getmtime(root + '/' + directories)),
 			"DIR" : "true"
@@ -160,25 +169,18 @@ def diff(org,temp):
 		print "   deletions : "
 		print_util(delet)
 		record_change(delet,'d')
-	
-
-
-
-
-
 
 
 
 def main():
 	try:
-	 	with open(os.path.join(database,'college.json'),'r') as outfile:
+	 	with open(os.path.join(database,'css.json'),'r') as outfile:
 	 		outfile.close()
 	except IOError,e :
 		print str(e)
 		print 'Running geet.py for fist time'
 		index(database,workingDir)
 
-	create_temp_files()
 
 	#deleting temporary files
 	#shutil.rmtree(os.path.join(database,'..','temp2'))
@@ -217,10 +219,11 @@ def record_change(List,x):
 			filedata = json.load(outfile)
 		except ValueError:
 			filedata = []
+		outfile.close()
 	except IOError:
-		outfile = open(JSON_file,'w')
-		filedata = []
 		
+		filedata = []
+	outfile = open(JSON_file,'w')	
 	filedata = filedata + List
 	json.dump(filedata,outfile,indent = 4)
 	outfile.close()
@@ -229,6 +232,26 @@ def record_change(List,x):
 
 main()
 
+####################################################
+#			HELPER FUNCTIONS
+####################################################
 
+def readfile(fileName):
+	filename = os.path.join(database,'..','temp2',fileName+'.json')
+	try :
+		outfile = open(filename,'r')
+		return json.load(outfile)
+	except IOError,e:
+		print "file error"
+		print str(e)
+		return
 
-
+def clean_temp2():
+	filename = os.path.join(database,'..','temp2')
+	try:
+		shutil.rmtree(filename)
+	except OSError,e:
+		print ''
+	update
+def update():
+	index(database,workingDir)
