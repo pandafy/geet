@@ -159,12 +159,12 @@ def diff(org,temp):
 	for i in range(len(deletions)):
 		flag = 0
 		for j in range(len(temp)):
-			if deletions[i]['name'] == temp[i]['name']:
+			if deletions[i]['name'] == temp[j]['name']:
 				print "\n\n do something \n\n"
 				flag = 1
 				break
 		if flag != 1:
-			delet.append(deletions)
+			delet.append(deletions[i])
 	if isnotempty_util(deletions):
 		print "   deletions : "
 		print_util(delet)
@@ -221,8 +221,8 @@ def record_change(List,x):
 			filedata = []
 		outfile.close()
 	except IOError:
-		
 		filedata = []
+	
 	outfile = open(JSON_file,'w')	
 	filedata = filedata + List
 	json.dump(filedata,outfile,indent = 4)
@@ -242,9 +242,7 @@ def readfile(fileName):
 		outfile = open(filename,'r')
 		return json.load(outfile)
 	except IOError,e:
-		print "file error"
 		print str(e)
-		return
 
 def clean_temp2():
 	filename = os.path.join(database,'..','temp2')
